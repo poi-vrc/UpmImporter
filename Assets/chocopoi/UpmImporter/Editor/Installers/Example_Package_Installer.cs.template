@@ -1,0 +1,74 @@
+﻿using UnityEditor;
+using Unity.Plastic.Newtonsoft.Json.Linq;
+using Chocopoi.UpmImporter;
+
+[InitializeOnLoad]
+public class Example_Package_Installer
+{
+    // Defines the original assets location. Ignore and remove related code if you do not need Assets->UPM migration
+    private const string OriginalAssetsInstallation = "Assets/ExampleAuthor/ExampleApp";
+
+    //
+    // Defines the scoped registry you want to add. This template script only implement single scoped registry.
+    // You can change it yourself if you need two or more scoped registries.
+    //
+
+    private static readonly string ScopedRegistryName = "package.openupm.com";
+
+    private static readonly string ScopedRegistryUrl = "https://package.openupm.com";
+
+    private static readonly string[] ScopedRegistryScopes = new string[] { "com.openupm" };
+
+    //
+    // Defines the packages you want to scope and install
+    //
+
+    private static readonly string[] PackagesToScope = new string[]
+    {
+
+    };
+
+    private static readonly string[] PackagesToInstall = new string[]
+    {
+
+    };
+
+    // Activated immediately after this script gets loaded
+    static Example_Package_Installer()
+    {
+        // Block installation if an existing "Assets" installation is found
+        // Remove this part of code and run Install() directly if you do not need Assets->UPM migration.
+        if (AssetDatabase.IsValidFolder(OriginalAssetsInstallation))
+        {
+            EditorUtility.DisplayDialog("example_package Installer", string.Format("Error: Old installation at \"{0}\" detected.\n\nIt will have conflicts as this installer installs a UPM version of it.\n\nPlease delete it manually and import this Unity package again.", OriginalAssetsInstallation), "OK");
+        } else
+        {
+            // Do installations
+            Install();
+        }
+
+        // Self-delete this script
+        AssetDatabase.DeleteAsset("Assets/chocopoi/UpmImporter/Editor/Installers/" + nameof(Example_Package_Installer) + ".cs");
+    }
+
+    private static void Install()
+    {
+        ScopedRegistryImporter sri = new ScopedRegistryImporter();
+
+        // Find scoped registry and add if not exist
+        JObject scopedRegistry = sri.FindScopedRegistry(ScopedRegistryUrl);
+        if (scopedRegistry == null)
+        {
+            scopedRegistry = sri.AddScopedRegistry(ScopedRegistryName, ScopedRegistryUrl, ScopedRegistryScopes);
+        }
+
+        // Add scoped packages
+        sri.AddScopedPackagesIfNotAdded(scopedRegistry, PackagesToScope);
+
+        // Write to file if changed
+        sri.SaveIfModified();
+
+        // Install UPM packages
+        UpmImporter.InstallUpmPackages(PackagesToInstall);
+    }
+}
