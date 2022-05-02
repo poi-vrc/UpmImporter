@@ -1,6 +1,6 @@
-﻿using UnityEngine;
-using System.IO;
+﻿using System.IO;
 using Unity.Plastic.Newtonsoft.Json.Linq;
+using UnityEngine;
 
 namespace Chocopoi.UpmImporter
 {
@@ -82,7 +82,7 @@ namespace Chocopoi.UpmImporter
         /// <returns>The scoped registry JSON Object</returns>
         public JObject FindScopedRegistry(string url)
         {
-            JArray scopedRegistries = (JArray) manifest["scopedRegistries"];
+            JArray scopedRegistries = (JArray)manifest["scopedRegistries"];
 
             if (scopedRegistries == null)
             {
